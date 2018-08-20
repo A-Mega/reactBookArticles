@@ -1,0 +1,11 @@
+https://habr.com/post/418581/
+https://legacy.gitbook.com/book/maxfarseer/react-course-ru-v2/details
+Основы React (текстовый учебник, 2-е издание)
+
+Использование props
+
+У каждого компонента могут быть свойства
+Они хранятся в this.props
+{}
+this.props используются только для чтения!
+{/* текст комментария */}
