@@ -17,13 +17,13 @@
       const myNews = [
         {
           id: 1,
-          author: 'ru_vds',
+          author: 'jone',
           text: '11 библиотек (наборов компонентов) для React Native, о которых стоит знать в 2018-м',
           bigText: 'В начале года мы опубликовали несколько материалов о популярных наборах компонентов для React, Angular и Vue. Сегодня мы представляем вашему вниманию перевод статьи из той же серии, посвящённой React Native. Учитывая непрекращающийся рост популярности React, и то, что мобильные приложения и PWA становятся всё востребованнее, неудивителен тот факт, что React Native привлекает всё большее внимание сообщества разработчиков.'
         },
         {
           id: 2,
-          author: 'ru_vds',
+          author: 'fee',
           text: 'Var, let или const? Проблемы областей видимости переменных и ES6',
           bigText: 'Области видимости в JavaScript всегда были непростой темой, особенно в сравнении с более строго организованными языками, такими, как C и Java. В течение многих лет области видимости в JS особенно широко не обсуждались, так как в языке попросту не было средств, которые позволяли бы существенно повлиять на сложившуюся ситуацию. Но в ECMAScript 6 появились некоторые новые возможности, которые позволяют разработчикам лучше контролировать области видимости переменных. Эти возможности в наши дни уже очень хорошо поддерживают браузеры, они вполне доступны для большинства разработчиков. Однако новые ключевые слова для объявления переменных, учитывая ещё и то, что старое ключевое слово var никуда не делось, означают не только новые возможности, но и появление новых вопросов. Когда использовать ключевые слова let и const? Как они себя ведут? В каких ситуациях всё ещё актуально ключевое слово var? Материал, перевод которого мы сегодня публикуем, направлен на исследование проблемы областей видимости переменных в JavaScript.'
         },
@@ -51,6 +51,7 @@
         }
         render() {
           const { author, text, bigText } = this.props.data
+          //console.log('Article', author, text, bigText)
           const { visible } = this.state
           return (
             <div className='article'>
@@ -71,6 +72,7 @@
       //структура
       Article.propTypes = {
         data: PropTypes.shape({
+          id: PropTypes.number.isRequired,
           author: PropTypes.string.isRequired,
           text: PropTypes.string.isRequired,
           bigText: PropTypes.string.isRequired
@@ -78,9 +80,7 @@
       }
 
       class News extends React.Component {
-        state = {
-          counter: 0,
-        }
+
         renderNews = () => {
           const { data } = this.props
           let newsTemplate = null
@@ -97,7 +97,6 @@
         }
         render() {
           const { data } = this.props
-          const { counter } = this.state
           
           return (
             <div className='news'>
@@ -119,12 +118,23 @@
         state = {
           name: '',
           text: '',
+          bigText: '',
           agree: false,
         }
         onBtnClickHandler = (e) => {
           e.preventDefault()
-          const { name, text } = this.state //вытащили значения из стейта (деструкторизация)
-          alert(name + '\n' + text)
+          const { name, text, bigText } = this.state //вытащили значения из стейта (деструкторизация)
+          //console.log('Add', name, text, bigText)
+          //передаём name & text
+          //big text пока отсутствует
+
+          //alert(name + '\n' + text)
+          this.props.onAddNews({ 
+            id: +new Date(),
+            author: name, 
+            text, 
+            bigText 
+          })
         }
         //вычисляемое значение ключа:
         handleChange = (e) => {
@@ -138,13 +148,13 @@
         //валидация на клиенте:
         validate = () => {
           const { name, text, agree } = this.state
-          if (name.trim() && text.trim() && agree) {
+          if (name.trim() && text.trim() && agree) { //bigText not required field
             return true
           }
           return false
         }
         render() {
-          const { name, text, agree } = this.state
+          const { name, text, bigText, agree } = this.state
           return (
             <form className='add'>
               <input
@@ -159,8 +169,15 @@
                 id='text'
                 onChange={this.handleChange}
                 className='add__text'
-                placeholder='Текст новости'
+                placeholder='Заголовок новости'
                 value={text}
+              ></textarea>
+              <textarea
+                id='bigText'
+                onChange={this.handleChange}
+                className='add__text'
+                placeholder='Текст новости'
+                value={bigText}
               ></textarea>
               <label className='add__checkrule'>
                 <input type='checkbox' onChange={this.handleCheckboxChange} /> Я согласен с правилами
@@ -176,14 +193,32 @@
         }
       }
 
-      const App = () => {
-        return (
-          <React.Fragment>
-            <Add />
-            <h3>Новости</h3>
-            <News data={myNews}/>
-          </React.Fragment>
-        )
+      Add.propTypes = {
+        onAddNews: PropTypes.func.isRequired
+      }
+
+      class App extends React.Component {
+        state = {
+          news: myNews //в начальное состояние положили значение из переменной
+        }
+
+        handleAddNews = (data) => {
+          //формируем новый массив
+          const nextNews = [data, ...this.state.news]
+          
+          this.setState({ news: nextNews })
+        }
+
+        render() {
+          return (
+            <React.Fragment>
+              <Add onAddNews={this.handleAddNews} />
+              <h3>Новости</h3>
+              {/* считали новости из this.state */}
+              <News data={this.state.news}/>
+            </React.Fragment>
+          )
+        }
       }
 
       ReactDOM.render(
